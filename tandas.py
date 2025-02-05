@@ -14,9 +14,10 @@ def crear_participante():
     nombre = input("Nombre del participante: ")
     telefono = input("Teléfono del participante: ")
     email = input("Email del participante: ")
+    clave = input("Clave del participante: ")  # Añadido
 
-    sql = "INSERT INTO Participantes (nombre, telefono, email) VALUES (%s, %s, %s)"
-    val = (nombre, telefono, email)
+    sql = "INSERT INTO Participantes (nombre, telefono, email, clave) VALUES (%s, %s, %s, %s)"  # Añadido clave
+    val = (nombre, telefono, email, clave)
     mycursor.execute(sql, val)
     mydb.commit()
     print("Participante creado exitosamente.")

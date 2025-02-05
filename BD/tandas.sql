@@ -25,6 +25,18 @@ except mysql.connector.errors.ProgrammingError as err:
     else:
         raise err  # Relanzar otros errores
 
+# Modificar la tabla Participantes para que el campo 'clave' tenga un valor predeterminado o permita valores nulos
+try:
+    mycursor.execute("""
+        ALTER TABLE Participantes MODIFY COLUMN clave VARCHAR(255) DEFAULT NULL;
+    """)
+    mydb.commit()
+    print("Campo 'clave' modificado en la tabla Participantes.")
+except mysql.connector.errors.ProgrammingError as err:
+    if err.errno == 1060:  # 1060 es el código de error para "columna duplicada"
+        print("El campo 'clave' ya existe en la tabla Participantes.")
+    else:
+        raise err  # Relanzar otros errores
 
 def crear_participante():
     while True:

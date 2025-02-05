@@ -2,18 +2,39 @@ import mysql.connector
 
 # Configuración de la conexión a la base de datos
 mydb = mysql.connector.connect(
-  host="localhost",
-  user="tu_usuario",  # Reemplaza con tu usuario de MySQL
-  password="tu_contraseña",  # Reemplaza con tu contraseña de MySQL
-  database="tandas"
+    host="localhost",
+    user="tu_usuario",  # Reemplaza con tu usuario de MySQL
+    password="tu_contraseña",  # Reemplaza con tu contraseña de MySQL
+    database="tandas"
 )
 
 mycursor = mydb.cursor()
 
+# Agregar columnas (si no existen)
+try:
+    mycursor.execute("""
+        ALTER TABLE Tandas 
+        ADD COLUMN fecha_inicio DATE,
+        ADD COLUMN fecha_fin DATE;
+    """)
+    mydb.commit()
+    print("Columnas 'fecha_inicio' y 'fecha_fin' agregadas a la tabla Tandas.")
+except mysql.connector.errors.ProgrammingError as err:
+    if err.errno == 1060:  # 1060 es el código de error para "columna duplicada"
+        print("Las columnas 'fecha_inicio' y 'fecha_fin' ya existen en la tabla Tandas.")
+    else:
+        raise err  # Relanzar otros errores
+
+
 def crear_participante():
-    nombre = input("Nombre del participante: ")
-    telefono = input("Teléfono del participante: ")
-    email = input("Email del participante: ")
+    while True:
+        try:
+            nombre = input("Nombre del participante: ")
+            telefono = input("Teléfono del participante: ")
+            email = input("Email del participante: ")
+            break
+        except ValueError:
+            print("Error: Datos inválidos. Intente de nuevo.")
 
     sql = "INSERT INTO Participantes (nombre, telefono, email) VALUES (%s, %s, %s)"
     val = (nombre, telefono, email)
@@ -21,13 +42,19 @@ def crear_participante():
     mydb.commit()
     print("Participante creado exitosamente.")
 
+
 def crear_tanda():
-    nombre_tanda = input("Nombre de la tanda: ")
-    monto_por_persona = float(input("Monto por persona: "))
-    frecuencia_pago = input("Frecuencia de pago (Semanal, Quincenal, Mensual): ")
-    num_participantes = int(input("Número de participantes: "))
-    fecha_inicio = input("Fecha de inicio (YYYY-MM-DD): ")  # Añadido
-    fecha_fin = input("Fecha de fin (YYYY-MM-DD): ")  # Añadido
+    while True:
+        try:
+            nombre_tanda = input("Nombre de la tanda: ")
+            monto_por_persona = float(input("Monto por persona: "))
+            frecuencia_pago = input("Frecuencia de pago (Semanal, Quincenal, Mensual): ")
+            num_participantes = int(input("Número de participantes: "))
+            fecha_inicio = input("Fecha de inicio (YYYY-MM-DD): ")  # Añadido
+            fecha_fin = input("Fecha de fin (YYYY-MM-DD): ")  # Añadido
+            break
+        except ValueError:
+            print("Error: Datos inválidos. Intente de nuevo.")
 
     sql = "INSERT INTO Tandas (nombre_tanda, monto_por_persona, frecuencia_pago, num_participantes, fecha_inicio, fecha_fin) VALUES (%s, %s, %s, %s, %s, %s)"  # Añadido fecha_inicio y fecha_fin
     val = (nombre_tanda, monto_por_persona, frecuencia_pago, num_participantes, fecha_inicio, fecha_fin)
@@ -35,10 +62,16 @@ def crear_tanda():
     mydb.commit()
     print("Tanda creada exitosamente.")
 
+
 def asignar_participante_a_tanda():
-    id_tanda = int(input("ID de la tanda: "))
-    id_participante = int(input("ID del participante: "))
-    num_tanda = int(input("Número de tanda para este participante: "))
+    while True:
+        try:
+            id_tanda = int(input("ID de la tanda: "))
+            id_participante = int(input("ID del participante: "))
+            num_tanda = int(input("Número de tanda para este participante: "))
+            break
+        except ValueError:
+            print("Error: Datos inválidos. Intente de nuevo.")
 
     sql = "INSERT INTO Tandas_Participantes (id_tanda, id_participante, num_tanda) VALUES (%s, %s, %s)"
     val = (id_tanda, id_participante, num_tanda)
@@ -46,16 +79,22 @@ def asignar_participante_a_tanda():
     mydb.commit()
     print("Participante asignado a la tanda exitosamente.")
 
-def registrar_pago():
-    id_tanda_participante = int(input("ID de la relación Tanda-Participante: "))
-    fecha_pago = input("Fecha de pago (YYYY-MM-DD): ")
-    monto_pagado = float(input("Monto pagado: "))
 
+def registrar_pago():
+    while True:
+        try:
+            id_tanda_participante = int(input("ID de la relación Tanda-Participante: "))
+            fecha_pago = input("Fecha de pago (YYYY-MM-DD): ")
+            monto_pagado = float(input("Monto pagado: "))
+            break
+        except ValueError:
+            print("Error: Datos inválidos. Intente de nuevo.")
     sql = "INSERT INTO Historial_Pagos (id_tanda_participante, fecha_pago, monto_pagado) VALUES (%s, %s, %s)"
     val = (id_tanda_participante, fecha_pago, monto_pagado)
     mycursor.execute(sql, val)
     mydb.commit()
     print("Pago registrado exitosamente.")
+
 
 # Menú principal
 while True:
